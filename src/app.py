@@ -67,7 +67,7 @@ col1, col2 = st.columns([1, 3])
 with col2:
     if plot_type == "Survival Curves":
         kmf = KaplanMeierFitter()
-        fig = plt.figure(figsize=(8, 5))
+        fig = plt.figure(figsize=(7, 4))
 
         for treatment, data in zip(["A", "B"], [paths_new, paths_ctrl]):
             kmf.fit(durations=pd.Series([len(pd.Series(path)[pd.Series(path) != "Dead"]) for path in data]),
@@ -92,7 +92,7 @@ with col2:
         cum_costs_new = cumulative_costs(paths_new, "A")
         cum_costs_ctrl = cumulative_costs(paths_ctrl, "B")
 
-        fig, ax = plt.subplots(figsize=(8, 5))
+        fig, ax = plt.subplots(figsize=(7, 4))
         ax.plot(cum_costs_new, label="Treatment A")
         ax.plot(cum_costs_ctrl, label="Treatment B")
         plt.xlabel("Month")
@@ -123,7 +123,7 @@ with col2:
                 probs.append(np.mean(nmb_new > nmb_ctrl))
             probs_ceac[label] = probs
 
-        plt.figure(figsize=(8, 5))
+        plt.figure(figsize=(7, 4))
         for label, probs in probs_ceac.items():
             plt.plot(wtp_values, probs, label=label)
         plt.axvline(wtp_threshold, color="gray", linestyle="--", label="WTP Threshold")

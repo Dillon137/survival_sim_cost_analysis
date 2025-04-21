@@ -5,9 +5,14 @@ import pandas as pd
 np.random.seed(42)
 
 def generate_clinical_data(age_range=[55,85], sex=["Male", "Female"], diagnosis_stages=["III", "IV"], n_patients=200):
+    np.random.seed(42)
+
     # Patient Attributes
     ages = np.random.randint(age_range[0], age_range[1], size=n_patients)
-    sexes = np.random.choice(sex, size=n_patients)
+    if type(sex) == str:
+        sexes = np.random.choice([sex], size=n_patients)
+    else:
+        sexes = np.random.choice(sex, size=n_patients)
     performance_status = np.random.choice([0, 1, 2, 3], size=n_patients, p=[0.2, 0.5, 0.2, 0.1])
     smoking_status = np.random.choice(['Current', 'Former', 'Never'], size=n_patients, p=[0.4, 0.5, 0.1])
     stage_at_diagnosis = np.random.choice(["III", "IV"], size=n_patients, p=[0.3, 0.7])
@@ -29,12 +34,13 @@ def generate_clinical_data(age_range=[55,85], sex=["Male", "Female"], diagnosis_
         ('IV', 'B'): {'k': 1.2, 'lambda_ttp': 12, 'lambda_ttd': 12},
     }
 
-    def adjust_lambda(base_lambda, age, perf_stat, smoking):
+    def adjust_lambda(base_lambda, age, sex, perf_stat, smoking):
         age_adj = max(1, 1 + 0.01*(age-60))
+        sex_adj = 1 if sex=="Male" else 0.9
         perf_adj = 1 + 0.1*(perf_stat-1)
         smoking_adj = smoking_dict[smoking]
 
-        return base_lambda/(age_adj*perf_adj*smoking_adj)
+        return base_lambda/(age_adj*sex_adj*perf_adj*smoking_adj)
 
     # Generate TTP and TTD
     time_to_progression = []
@@ -43,14 +49,14 @@ def generate_clinical_data(age_range=[55,85], sex=["Male", "Female"], diagnosis_
     for patient in range(n_patients):
         k = params[(stage_at_diagnosis[patient], treatments[patient])]['k']
         base_lambda_ttp = params[(stage_at_diagnosis[patient], treatments[patient])]['lambda_ttp']
-        lambda_ttp = adjust_lambda(base_lambda_ttp, ages[patient], performance_status[patient], smoking_status[patient])
+        lambda_ttp = adjust_lambda(base_lambda_ttp, ages[patient], sexes[patient], performance_status[patient], smoking_status[patient])
 
         # If stage IV, progression is treated as death
         if stage_at_diagnosis[patient] == "IV":
             lambda_ttd = lambda_ttp
         else:
             base_lambda_ttd = params[(stage_at_diagnosis[patient], treatments[patient])]['lambda_ttd']
-            lambda_ttd = adjust_lambda(base_lambda_ttd, ages[patient], performance_status[patient], smoking_status[patient])
+            lambda_ttd = adjust_lambda(base_lambda_ttd, ages[patient], sexes[patient], performance_status[patient], smoking_status[patient])
 
         ttp = np.random.weibull(k)*lambda_ttp
 
@@ -80,6 +86,8 @@ def generate_clinical_data(age_range=[55,85], sex=["Male", "Female"], diagnosis_
 
 
 def run_simulation(patient_data, time_horizon=80, n_simulations=1000):
+    np.random.seed(42)
+
     # Initialize Markov states
     treatment_A = patient_data[patient_data["treatment"] == "A"]
     treatment_B = patient_data[patient_data["treatment"] == "B"]
