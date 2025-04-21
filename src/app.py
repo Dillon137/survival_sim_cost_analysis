@@ -221,7 +221,7 @@ st.title("Lung Cancer Trial Outcomes")
 # Sidebar
 st.sidebar.header("Filters")
 plot_type = st.sidebar.selectbox("Select Plot", ["Survival Curves", "Cumulative Costs", "CEAC"])
-age_filter = st.slider("Select Age Range", 50, 80, (55, 65))
+age_filter = st.sidebar.slider("Select Age Range", 50, 80, (55, 65))
 sex_filter = st.sidebar.selectbox("Select Sex", ["All", "Male", "Female"])
 disease_stage = st.sidebar.selectbox("Select Stage", ["III", "IV"])
 
