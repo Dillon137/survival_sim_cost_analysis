@@ -89,8 +89,8 @@ with col2:
             return np.mean(cum_costs, axis=0)
 
 
-        cum_costs_new = cumulative_costs(paths_new, "Experimental")
-        cum_costs_ctrl = cumulative_costs(paths_ctrl, "Control")
+        cum_costs_new = cumulative_costs(paths_new, "A")
+        cum_costs_ctrl = cumulative_costs(paths_ctrl, "B")
 
         fig, ax = plt.subplots(figsize=(7, 4))
         ax.plot(cum_costs_new, label="Experimental Treatment")
