@@ -53,7 +53,7 @@ else:
 
 patient_data = generate_clinical_data(age_filter, sex)
 
-paths_new, costs_new, qalys_new, paths_ctrl, costs_ctrl, qalys_ctrl = run_simulation(patient_data, time_horizon, n_simulations)
+paths_ctrl, costs_ctrl, qalys_ctrl, paths_new, costs_new, qalys_new  = run_simulation(patient_data, time_horizon, n_simulations)
 
 
 # Apply filter
