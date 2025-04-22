@@ -36,7 +36,8 @@ def generate_clinical_data(age_range=[55,85], sex=["Male", "Female"], diagnosis_
 
     def adjust_lambda(base_lambda, age, sex, perf_stat, smoking):
         age_adj = max(1, 1 + 0.01*(age-60))
-        sex_adj = 1 if sex=="Male" else 0.9
+        # sex_adj = 1 if sex=="Male" else 0.99
+        sex_adj = 1
         perf_adj = 1 + 0.1*(perf_stat-1)
         smoking_adj = smoking_dict[smoking]
 
@@ -153,8 +154,8 @@ def run_simulation(patient_data, time_horizon=80, n_simulations=1000):
     # Define health state costs per month (USD)
     costs = {
         "A": {
-            "III": 1200,
-            "IV": 2400,
+            "III": 1050,
+            "IV": 2100,
             "Dead": 0
         },
 
@@ -167,8 +168,8 @@ def run_simulation(patient_data, time_horizon=80, n_simulations=1000):
 
     # Define QALYs per state per month
     qaly_weights = {
-        "III": np.random.normal(0.85, 0.05),
-        "IV": np.random.normal(0.5, 0.05),
+        "III": 0.85,
+        "IV": 0.5,
         "Dead": 0
     }
 
@@ -177,13 +178,13 @@ def run_simulation(patient_data, time_horizon=80, n_simulations=1000):
         paths = []
         for _ in range(n_simulations):
             path = []
-            state = np.random.choice(["III", "IV"], p=[0.3, 0.7])
+            state = np.random.choice(["III", "IV"], p=[0.8, 0.2])
             for _ in range(time_horizon):
                 probs = transition_probs[treatment][state]
                 next_state = np.random.choice(["III", "IV", "Dead"], p=probs)
                 path.append(next_state)
                 if next_state == "Dead":
-                    path.extend(["Dead"] * (time_horizon - len(path)))
+                    path.extend(["Dead"] * (time_horizon-len(path)))
                     break
                 state = next_state
             paths.append(path)

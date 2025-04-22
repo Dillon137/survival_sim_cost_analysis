@@ -17,7 +17,7 @@ st.title("Lung Cancer Trial Outcomes")
 st.sidebar.header("Filters")
 plot_type = st.sidebar.selectbox("Select Plot", ["Survival Curves", "Cumulative Costs", "CEAC"])
 age_filter = st.sidebar.slider("Select Age Range", 50, 80, (55, 65))
-sex_filter = st.sidebar.selectbox("Select Sex", ["All", "Male", "Female"])
+sex_filter = st.sidebar.selectbox("Select Sex (Not currently linked!)", ["All", "Male", "Female"])
 disease_stage = st.sidebar.selectbox("Select Stage (Not currently linked!)", ["III", "IV"])
 
 n_patients = st.sidebar.number_input("Number of patients in trial", min_value=100, step=10)
@@ -69,7 +69,7 @@ with col2:
         kmf = KaplanMeierFitter()
         fig = plt.figure(figsize=(7, 4))
 
-        for treatment, data in zip(["A", "B"], [paths_new, paths_ctrl]):
+        for treatment, data in zip(["Experimental", "Control"], [paths_new, paths_ctrl]):
             kmf.fit(durations=pd.Series([len(pd.Series(path)[pd.Series(path) != "Dead"]) for path in data]),
                     event_observed=[("Dead" in path) for path in data], label=treatment)
             kmf.plot_survival_function()
@@ -89,12 +89,12 @@ with col2:
             return np.mean(cum_costs, axis=0)
 
 
-        cum_costs_new = cumulative_costs(paths_new, "A")
-        cum_costs_ctrl = cumulative_costs(paths_ctrl, "B")
+        cum_costs_new = cumulative_costs(paths_new, "Experimental")
+        cum_costs_ctrl = cumulative_costs(paths_ctrl, "Control")
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        ax.plot(cum_costs_new, label="Treatment A")
-        ax.plot(cum_costs_ctrl, label="Treatment B")
+        ax.plot(cum_costs_new, label="Experimental Treatment")
+        ax.plot(cum_costs_ctrl, label="Control Treatment")
         plt.xlabel("Month")
         plt.ylabel("Cumulative Cost ($)")
         plt.title("Cost Over Time")
@@ -107,9 +107,8 @@ with col2:
         wtp_values = np.arange(0, 200000, 1000)
         wtp_threshold = 100000
 
-        """
-        Currently using naive estimates for each pricing method  
-        """
+
+        # Currently using naive estimates for each pricing method
         cost_mults = {"CEA": 1.0, "GRACE": 1.05, "Dynamic Pricing": 1.1, "Stacked Cohorts": 0.95}
 
         # Different WTP thresholds for different approaches
@@ -118,8 +117,8 @@ with col2:
             adj_costs_new = costs_new * cost_mult
             probs = []
             for wtp in wtp_values:
-                nmb_new = qalys_new * wtp - adj_costs_new
-                nmb_ctrl = qalys_ctrl * wtp - costs_ctrl
+                nmb_new = qalys_new*wtp - adj_costs_new
+                nmb_ctrl = qalys_ctrl*wtp - costs_ctrl
                 probs.append(np.mean(nmb_new > nmb_ctrl))
             probs_ceac[label] = probs
 
@@ -134,3 +133,31 @@ with col2:
         plt.grid(True)
         plt.tight_layout()
         st.pyplot(plt)
+
+
+
+
+
+
+
+
+
+
+    # Debugging CEAC
+    # mean_nmb_diff = [
+    #     (np.mean(qalys_new) * wtp - np.mean(costs_new)) -
+    #     (np.mean(qalys_ctrl) * wtp - np.mean(costs_ctrl))
+    #     for wtp in wtp_values
+    # ]
+    #
+    # # Plotting
+    # fig, ax = plt.subplots(figsize=(8, 5))
+    # ax.plot(wtp_values, mean_nmb_diff, marker='o', linestyle='-')
+    # ax.set_title("Mean Net Monetary Benefit Difference vs Willingness to Pay")
+    # ax.set_xlabel("Willingness to Pay (USD per QALY)")
+    # ax.set_ylabel("Mean NMB Difference (Treatment Experimental - Control)")
+    # ax.axhline(0, color='gray', linestyle='--', linewidth=1)
+    # ax.grid(True)
+    #
+    # # Show plot in Streamlit
+    # st.pyplot(fig)
